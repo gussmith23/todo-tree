@@ -3,6 +3,8 @@
 
 extern crate rocket;
 
+use rocket as rkt;
+
 #[get("/")]
 fn index() -> &'static str {
     "Nothing here."
@@ -10,5 +12,5 @@ fn index() -> &'static str {
 
 fn main() {
     // Serve index() at http://localhost:8000/
-    rocket::ignite().mount("/", routes![index]).launch();
+    rkt::ignite().mount("/", routes![index]).launch();
 }
