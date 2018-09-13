@@ -3,6 +3,9 @@
 
 extern crate rocket;
 
+mod todo_list;
+mod todo_list_store;
+
 use rocket as rkt;
 use std::sync::Mutex;
 
