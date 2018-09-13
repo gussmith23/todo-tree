@@ -55,3 +55,16 @@ impl TodoListStore for InMemoryStore {
         self.list_map.remove(&id).map(|_| ()).ok_or(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn in_memory_store_create() {
+        let mut store = InMemoryStore::new();
+        let list = TodoList { title: "abc".to_string(), entries: Default::default() };
+        let id = store.create(&list).unwrap();
+        assert_eq!(store.read(id).unwrap().title, list.title);
+    }
+}
