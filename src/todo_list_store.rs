@@ -67,4 +67,14 @@ mod tests {
         let id = store.create(&list).unwrap();
         assert_eq!(store.read(id).unwrap().title, list.title);
     }
+
+    #[test]
+    fn in_memory_store_update() {
+        let mut store = InMemoryStore::new();
+        let list1 = TodoList { title: "abc".to_string(), entries: Default::default() };
+        let id = store.create(&list1).unwrap();
+        let list2 = TodoList { title: "123".to_string(), entries: Default::default() };
+        store.update(id, &list2).unwrap();
+        assert_eq!(store.read(id).unwrap().title, list2.title);
+    }
 }
