@@ -3,6 +3,8 @@
 
 extern crate rocket;
 
+mod list;
+
 use rocket as rkt;
 use std::sync::Mutex;
 
