@@ -27,7 +27,7 @@ fn create(state: rkt::State<ServerState>, title: String) -> String {
     };
     let mut list_store = state.todo_list_store.lock().unwrap();
     let id = list_store.create(&todo_list).unwrap();
-    format!("Createe Todo List with id {}.", id.0)
+    format!("Created Todo List with id {}.", id.0)
 }
 
 //Create rocket instance
