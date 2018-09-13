@@ -19,7 +19,7 @@ struct ServerState {
     todo_list_store: Mutex<InMemoryStore>,
 }
 
-#[post("/create", format = "media/text", data = "<title>")]
+#[post("/create", format = "text/plain", data = "<title>")]
 fn create(state: rkt::State<ServerState>, title: String) -> String {
     let todo_list = TodoList {
         title: title.to_string(),
@@ -30,11 +30,35 @@ fn create(state: rkt::State<ServerState>, title: String) -> String {
     format!("Createe Todo List with id {}.", id.0)
 }
 
-fn main() {
-    // Manage state and serve index() at http://localhost:8000/
+//Create rocket instance
+fn rocket() -> rocket::Rocket {
     rkt::ignite()
         .manage(ServerState {
             todo_list_store: Mutex::new(InMemoryStore::new()),
         }).mount("/", routes![create])
-        .launch();
+}
+
+fn main() {
+    rocket().launch();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::rocket;
+    use rocket::http::ContentType;
+    use rocket::http::Status;
+    use rocket::local::Client;
+
+    #[test]
+    fn test_create() {
+        let client = Client::new(rocket()).expect("valid rocket instance");
+
+        let response = client
+            .post("create")
+            .body("title=abc")
+            .header(ContentType::Plain)
+            .dispatch();
+
+        assert_eq!(response.status(), Status::Ok);
+    }
 }
