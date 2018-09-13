@@ -16,19 +16,7 @@ use todo_list::TodoList;
 use todo_list_store::*;
 
 struct ServerState {
-    hit_count: Mutex<usize>,
     todo_list_store: Mutex<InMemoryStore>,
-}
-
-#[get("/")]
-fn index(state: rkt::State<ServerState>) -> String {
-    let old_count = {
-        let mut hit_count = state.hit_count.lock().unwrap();
-        *hit_count += 1;
-        *hit_count - 1
-    };
-
-    format!("Server hit {} times since start.", old_count)
 }
 
 #[post("/create", format = "media/text", data = "<title>")]
@@ -46,8 +34,7 @@ fn main() {
     // Manage state and serve index() at http://localhost:8000/
     rkt::ignite()
         .manage(ServerState {
-            hit_count: Mutex::new(0),
             todo_list_store: Mutex::new(InMemoryStore::new()),
-        }).mount("/", routes![index, create])
+        }).mount("/", routes![create])
         .launch();
 }
