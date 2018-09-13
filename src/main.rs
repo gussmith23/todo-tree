@@ -10,7 +10,7 @@ use rocket as rkt;
 use std::sync::Mutex;
 
 struct ServerState {
-    hit_count: Mutex<usize>
+    hit_count: Mutex<usize>,
 }
 
 #[get("/")]
@@ -27,6 +27,8 @@ fn index(state: rkt::State<ServerState>) -> String {
 fn main() {
     // Manage state and serve index() at http://localhost:8000/
     rkt::ignite()
-        .manage(ServerState { hit_count: Mutex::new(0) })
-        .mount("/", routes![index]).launch();
+        .manage(ServerState {
+            hit_count: Mutex::new(0),
+        }).mount("/", routes![index])
+        .launch();
 }
