@@ -2,6 +2,10 @@
 #![plugin(rocket_codegen)]
 
 extern crate rocket;
+#[macro_use]
+extern crate rocket_contrib;
+#[macro_use]
+extern crate serde_derive;
 
 mod todo_list;
 mod todo_list_store;
