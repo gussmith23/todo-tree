@@ -19,6 +19,13 @@ struct ServerState {
     todo_list_store: Mutex<InMemoryStore>,
 }
 
+#[get("/lists/<id>", format = "application/json")]
+fn get_list(state: rkt::State<ServerState>, id: u64) -> String {
+    let todo_list_id = TodoListId(id);
+    let list_store = state.todo_list_store.lock().unwrap();
+    list_store.read(todo_list_id).unwrap().title
+}
+
 #[post("/lists", format = "text/plain", data = "<title>")]
 fn create(state: rkt::State<ServerState>, title: String) -> String {
     let todo_list = TodoList {
@@ -35,7 +42,7 @@ fn rocket() -> rocket::Rocket {
     rkt::ignite()
         .manage(ServerState {
             todo_list_store: Mutex::new(InMemoryStore::new()),
-        }).mount("/", routes![create])
+        }).mount("/", routes![create, get_list])
 }
 
 fn main() {
@@ -60,5 +67,23 @@ mod tests {
             .dispatch();
 
         assert_eq!(response.status(), Status::Ok);
+    }
+
+    #[test]
+    fn test_get() {
+        let client = Client::new(rocket()).expect("valid rocket instance");
+
+        //add a list
+        client
+            .post("/lists")
+            .body("title=abc")
+            .header(ContentType::Plain)
+            .dispatch();
+        let response1 = client
+            .get(format!("/lists/{}", 0))
+            .header(ContentType::JSON)
+            .dispatch();
+
+        assert_eq!(response1.status(), Status::Ok);
     }
 }
