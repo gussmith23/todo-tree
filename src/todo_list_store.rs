@@ -7,7 +7,7 @@ pub struct TodoListId(pub u64);
 
 pub trait TodoListStore {
     fn create(&mut self, todo_list: &TodoList) -> Result<TodoListId, ()>;
-    fn read(&self, id: TodoListId) -> Result<TodoList, ()>;
+    fn read(&self, id: TodoListId) -> Option<TodoList>;
     fn update(&mut self, id: TodoListId, todo_list: &TodoList) -> Result<(), ()>;
     fn delete(&mut self, id: TodoListId) -> Result<(), ()>;
 }
@@ -37,8 +37,8 @@ impl TodoListStore for InMemoryStore {
         Ok(id)
     }
 
-    fn read(&self, id: TodoListId) -> Result<TodoList, ()> {
-        self.list_map.get(&id).map(Clone::clone).ok_or(())
+    fn read(&self, id: TodoListId) -> Option<TodoList> {
+        self.list_map.get(&id).map(Clone::clone)
     }
 
     fn update(&mut self, id: TodoListId, todo_list: &TodoList) -> Result<(), ()> {

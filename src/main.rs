@@ -20,10 +20,10 @@ struct ServerState {
 }
 
 #[get("/lists/<id>", format = "application/json")]
-fn get_list(state: rkt::State<ServerState>, id: u64) -> String {
+fn get_list(state: rkt::State<ServerState>, id: u64) -> Option<String> {
     let todo_list_id = TodoListId(id);
     let list_store = state.todo_list_store.lock().unwrap();
-    list_store.read(todo_list_id).unwrap().title
+    list_store.read(todo_list_id).map(|t| t.title)
 }
 
 #[post("/lists", format = "text/plain", data = "<title>")]
@@ -83,7 +83,12 @@ mod tests {
             .get(format!("/lists/{}", 0))
             .header(ContentType::JSON)
             .dispatch();
+        let response2 = client
+            .get(format!("/lists/{}", 9))
+            .header(ContentType::JSON)
+            .dispatch();
 
         assert_eq!(response1.status(), Status::Ok);
+        assert_eq!(response2.status(), Status::NotFound);
     }
 }
