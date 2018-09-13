@@ -19,7 +19,7 @@ struct ServerState {
     todo_list_store: Mutex<InMemoryStore>,
 }
 
-#[post("/create", format = "text/plain", data = "<title>")]
+#[post("/lists", format = "text/plain", data = "<title>")]
 fn create(state: rkt::State<ServerState>, title: String) -> String {
     let todo_list = TodoList {
         title: title.to_string(),
@@ -54,7 +54,7 @@ mod tests {
         let client = Client::new(rocket()).expect("valid rocket instance");
 
         let response = client
-            .post("create")
+            .post("/lists")
             .body("title=abc")
             .header(ContentType::Plain)
             .dispatch();
