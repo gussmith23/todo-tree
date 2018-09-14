@@ -13,7 +13,7 @@ pub enum TodoListStoreError {
 
 pub trait TodoListStore {
     fn create(&mut self, todo_list: &TodoList) -> Result<TodoListId, TodoListStoreError>;
-    fn read(&self, id: TodoListId) -> Result<TodoList, TodoListStoreError>;
+    fn getone(&self, id: TodoListId) -> Result<TodoList, TodoListStoreError>;
     fn update(&mut self, id: TodoListId, todo_list: &TodoList) -> Result<(), TodoListStoreError>;
     fn delete(&mut self, id: TodoListId) -> Result<(), TodoListStoreError>;
 }
@@ -43,8 +43,11 @@ impl TodoListStore for InMemoryStore {
         Ok(id)
     }
 
-    fn read(&self, id: TodoListId) -> Result<TodoList, TodoListStoreError> {
-        self.list_map.get(&id).map(Clone::clone).ok_or(TodoListStoreError::IdNotFound)
+    fn getone(&self, id: TodoListId) -> Result<TodoList, TodoListStoreError> {
+        self.list_map
+            .get(&id)
+            .map(Clone::clone)
+            .ok_or(TodoListStoreError::IdNotFound)
     }
 
     fn update(&mut self, id: TodoListId, todo_list: &TodoList) -> Result<(), TodoListStoreError> {
@@ -58,7 +61,10 @@ impl TodoListStore for InMemoryStore {
     }
 
     fn delete(&mut self, id: TodoListId) -> Result<(), TodoListStoreError> {
-        self.list_map.remove(&id).map(|_| ()).ok_or(TodoListStoreError::IdNotFound)
+        self.list_map
+            .remove(&id)
+            .map(|_| ())
+            .ok_or(TodoListStoreError::IdNotFound)
     }
 }
 
@@ -74,7 +80,7 @@ mod tests {
             entries: Default::default(),
         };
         let id = store.create(&list).unwrap();
-        assert_eq!(store.read(id).unwrap().title, list.title);
+        assert_eq!(store.getone(id).unwrap().title, list.title);
     }
 
     #[test]
@@ -90,6 +96,6 @@ mod tests {
             entries: Default::default(),
         };
         store.update(id, &list2).unwrap();
-        assert_eq!(store.read(id).unwrap().title, list2.title);
+        assert_eq!(store.getone(id).unwrap().title, list2.title);
     }
 }

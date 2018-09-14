@@ -40,7 +40,7 @@ fn update_list(state: rkt::State<ServerState>, id: u64, title: String) -> Option
 fn get_list(state: rkt::State<ServerState>, id: u64) -> Option<String> {
     let todo_list_id = TodoListId(id);
     let list_store = state.todo_list_store.lock().unwrap();
-    list_store.read(todo_list_id).map(|t| t.title).ok()
+    list_store.getone(todo_list_id).map(|t| t.title).ok()
 }
 
 #[post("/lists", format = "text/plain", data = "<title>")]
