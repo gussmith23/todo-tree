@@ -23,7 +23,7 @@ struct ServerState {
 fn get_list(state: rkt::State<ServerState>, id: u64) -> Option<String> {
     let todo_list_id = TodoListId(id);
     let list_store = state.todo_list_store.lock().unwrap();
-    list_store.read(todo_list_id).map(|t| t.title)
+    list_store.read(todo_list_id).map(|t| t.title).ok()
 }
 
 #[post("/lists", format = "text/plain", data = "<title>")]

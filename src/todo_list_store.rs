@@ -5,11 +5,17 @@ use std::collections::HashMap;
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct TodoListId(pub u64);
 
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
+pub enum TodoListStoreError {
+    IdNotFound,
+    Other,
+}
+
 pub trait TodoListStore {
-    fn create(&mut self, todo_list: &TodoList) -> Result<TodoListId, ()>;
-    fn read(&self, id: TodoListId) -> Option<TodoList>;
-    fn update(&mut self, id: TodoListId, todo_list: &TodoList) -> Result<(), ()>;
-    fn delete(&mut self, id: TodoListId) -> Result<(), ()>;
+    fn create(&mut self, todo_list: &TodoList) -> Result<TodoListId, TodoListStoreError>;
+    fn read(&self, id: TodoListId) -> Result<TodoList, TodoListStoreError>;
+    fn update(&mut self, id: TodoListId, todo_list: &TodoList) -> Result<(), TodoListStoreError>;
+    fn delete(&mut self, id: TodoListId) -> Result<(), TodoListStoreError>;
 }
 
 pub struct InMemoryStore {
@@ -27,32 +33,32 @@ impl InMemoryStore {
 }
 
 impl TodoListStore for InMemoryStore {
-    fn create(&mut self, todo_list: &TodoList) -> Result<TodoListId, ()> {
+    fn create(&mut self, todo_list: &TodoList) -> Result<TodoListId, TodoListStoreError> {
         let id = self.cur_id;
         if id.0 == u64::max_value() {
-            return Err(());
+            return Err(TodoListStoreError::Other);
         }
         self.cur_id.0 += 1;
         self.list_map.insert(id, todo_list.clone());
         Ok(id)
     }
 
-    fn read(&self, id: TodoListId) -> Option<TodoList> {
-        self.list_map.get(&id).map(Clone::clone)
+    fn read(&self, id: TodoListId) -> Result<TodoList, TodoListStoreError> {
+        self.list_map.get(&id).map(Clone::clone).ok_or(TodoListStoreError::IdNotFound)
     }
 
-    fn update(&mut self, id: TodoListId, todo_list: &TodoList) -> Result<(), ()> {
+    fn update(&mut self, id: TodoListId, todo_list: &TodoList) -> Result<(), TodoListStoreError> {
         match self.list_map.get_mut(&id) {
             Some(v) => {
                 *v = todo_list.clone();
                 Ok(())
             }
-            None => Err(()),
+            None => Err(TodoListStoreError::IdNotFound),
         }
     }
 
-    fn delete(&mut self, id: TodoListId) -> Result<(), ()> {
-        self.list_map.remove(&id).map(|_| ()).ok_or(())
+    fn delete(&mut self, id: TodoListId) -> Result<(), TodoListStoreError> {
+        self.list_map.remove(&id).map(|_| ()).ok_or(TodoListStoreError::IdNotFound)
     }
 }
 
