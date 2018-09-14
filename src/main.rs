@@ -10,10 +10,30 @@ extern crate serde_derive;
 mod todo_list;
 mod todo_list_store;
 
+use rkt::http;
+use rkt::response::status;
+use rkt::response::Responder;
 use rocket as rkt;
 use std::sync::Mutex;
 use todo_list::TodoList;
 use todo_list_store::*;
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
+enum Failable<T> {
+    Succ(T),
+    Fail(String),
+}
+
+impl<'r, T: Responder<'r>> Responder<'r> for Failable<T> {
+    fn respond_to(self, request: &rkt::Request) -> Result<rkt::Response<'r>, http::Status> {
+        match self {
+            Failable::Succ(x) => x.respond_to(request),
+            Failable::Fail(s) => {
+                status::Custom(http::Status::InternalServerError, s).respond_to(request)
+            }
+        }
+    }
+}
 
 struct ServerState {
     todo_list_store: Mutex<InMemoryStore>,
