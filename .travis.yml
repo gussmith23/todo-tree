@@ -10,6 +10,8 @@ cache: cargo
 services:
     - docker
 
-before_install:
+script:
+    - cargo build --verbose
+    - cargo test --verbose
     - docker build -t todo-tree .
     - docker ps -a
