@@ -18,6 +18,11 @@ use std::sync::Mutex;
 use todo_list::TodoList;
 use todo_list_store::*;
 
+/// Represents an operation that can fail. This is structurally
+/// similar to `Option<T>` but different semantically. Additionally,
+/// it allows a `String` to be returned as a failure message.
+///
+/// This implements a `Responder` that returns HTTP 500 upon `Fail`.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
 enum Failable<T> {
     Succ(T),
@@ -35,16 +40,20 @@ impl<'r, T: Responder<'r>> Responder<'r> for Failable<T> {
     }
 }
 
+/// Contains the server's state used in the various handlers. Mutable
+/// fields must be in `Mutex`es since Rocket is multithreaded.
 struct ServerState {
     todo_list_store: Mutex<InMemoryStore>,
 }
 
+/// HTTP handler for deleting lists.
 #[delete("/lists/<id>", format = "application/json")]
 fn delete_list(state: rkt::State<ServerState>, id: u64) -> Option<()> {
     let mut list_store = state.todo_list_store.lock().unwrap();
     list_store.delete(TodoListId(id)).ok()
 }
 
+/// HTTP handler for modifying lists. Currently, it just sets the title.
 #[put("/lists/<id>", format = "application/json", data = "<title>")]
 fn update_list(state: rkt::State<ServerState>, id: u64, title: String) -> Option<()> {
     let todo_list_id = TodoListId(id);
@@ -56,6 +65,8 @@ fn update_list(state: rkt::State<ServerState>, id: u64, title: String) -> Option
     list_store.update(todo_list_id, &todo_list).ok()
 }
 
+/// HTTP handler for retrieving lists. Since we are only setting the
+/// title, this only returns the title.
 #[get("/lists/<id>", format = "application/json")]
 fn get_list(state: rkt::State<ServerState>, id: u64) -> Option<String> {
     let todo_list_id = TodoListId(id);
@@ -63,6 +74,8 @@ fn get_list(state: rkt::State<ServerState>, id: u64) -> Option<String> {
     list_store.getone(todo_list_id).map(|t| t.title).ok()
 }
 
+/// HTTP handler for creating lists. Currently, it just sets the
+/// title. Returns the ID as a string.
 #[post("/lists", format = "text/plain", data = "<title>")]
 fn create_list(state: rkt::State<ServerState>, title: String) -> String {
     let todo_list = TodoList {
