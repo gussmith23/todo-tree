@@ -27,9 +27,3 @@ jobs:
               script: bash infra/deploy.sh
               on:
                   branch: master
-
-deploy:
-    provider: script
-    script: bash infra/deploy.sh
-    on:
-        branch: master
