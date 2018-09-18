@@ -1,0 +1,29 @@
+sudo: required
+
+language: rust
+
+rust:
+    - nightly
+
+cache: cargo
+
+before_install:
+    - openssl aes-256-cbc -K $encrypted_3d130dceec06_key -iv $encrypted_3d130dceec06_iv -in compute-engine-creds.json.enc -out compute-engine-creds.json -d
+
+script:
+    - cargo build --verbose
+    - cargo test --verbose
+
+jobs:
+    incude:
+        - stage: deploy
+          services: docker
+          script:
+              - docker build -t todo-tree .
+              - docker ps -a
+              - docker save -o todo-tree.tar todo-tree
+          deploy:
+              provider: script
+              script: bash infra/deploy.sh
+              on:
+                  branch: master
