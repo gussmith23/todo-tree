@@ -15,7 +15,7 @@ script:
     - cargo test --verbose
 
 jobs:
-    incude:
+    include:
         - stage: deploy
           services: docker
           script:
