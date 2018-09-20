@@ -1,0 +1,25 @@
+sudo: required
+
+language: rust
+
+rust:
+    - nightly
+
+jobs:
+    include:
+        - stage: test
+          script:
+              - cargo build --verbose
+              - cargo test --verbose
+          cache: cargo
+        - stage: deploy
+          services: docker
+          script:
+              - docker build -t todo-tree .
+              - docker ps -a
+              - docker save -o todo-tree.tar todo-tree
+          deploy:
+              provider: script
+              script: bash infra/deploy.sh
+              on:
+                  branch: master
