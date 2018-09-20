@@ -14,8 +14,6 @@ jobs:
           cache: cargo
         - stage: deploy
           services: docker
-          before_install:
-              - openssl aes-256-cbc -K $encrypted_3d130dceec06_key -iv $encrypted_3d130dceec06_iv -in compute-engine-creds.json.enc -out compute-engine-creds.json -d
           script:
               - docker build -t todo-tree .
               - docker ps -a
