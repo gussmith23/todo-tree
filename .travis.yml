@@ -19,6 +19,7 @@ jobs:
               - docker ps -a
               - docker save -o todo-tree.tar todo-tree
           deploy:
+              skip_cleanup: true
               provider: script
               script: bash infra/deploy.sh
               on:

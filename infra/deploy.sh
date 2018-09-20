@@ -1,6 +1,5 @@
 set -e
 
-ls -lha
 openssl aes-256-cbc -K $encrypted_3d130dceec06_key -iv $encrypted_3d130dceec06_iv -in compute-engine-creds.json.enc -out compute-engine-creds.json -d
 curl https://sdk.cloud.google.com | CLOUDSDK_INSTALL_DIR=$HOME CLOUDSDK_CORE_DISABLE_PROMPTS=1 bash
 mkdir -p lib
